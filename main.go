@@ -11,13 +11,30 @@ import (
 	"net/http"
 )
 
-func HomeEndpoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Hello world")
+func initEncrypt(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		http.Error(w, "404 not found.", http.StatusNotFound)
+		return
+	case "POST":
+		if err := r.ParseForm(); err != nil {
+			fmt.Fprintf(w, "ParseForm() err: %v", err)
+			return
+		}
+		psswrd := r.FormValue("psswrd")
+		text := r.FormValue("text")
+		fmt.Fprintf(w, "Key: %s\n", psswrd)
+		fmt.Fprintf(w, "Message: %s\n", text)
+		fmt.Println(w, "Key: %s\n", psswrd)
+		fmt.Println(w, "Message: %s\n", text)
+	default:
+		fmt.Fprintf(w, "Only GET and POST requests are supported.")
+	}
 }
 
 func main() {
-	http.HandleFunc("/", HomeEndpoint)
-	fmt.Println("request #: ", inc())
+	http.HandleFunc("/", initEncrypt)
+	fmt.Println("listening on port 3000...")
 	if err := http.ListenAndServe(":3000", nil); err != nil {
 		log.Fatal(err)
 	}
