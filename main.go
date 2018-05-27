@@ -7,10 +7,20 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
+	"net/http"
 )
 
+func HomeEndpoint(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Hello world")
+}
+
 func main() {
-	fmt.Println("from main")
+	http.HandleFunc("/", HomeEndpoint)
+	fmt.Println("request #: ", inc())
+	if err := http.ListenAndServe(":3000", nil); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func encrypt() {
@@ -20,6 +30,7 @@ func encrypt() {
 	// package like bcrypt or scrypt.
 	// When decoded the key should be 16 bytes (AES-128) or 32 (AES-256).
 	key, _ := hex.DecodeString("6368616e676520746869732070617373776f726420746f206120736563726574")
+	//679098d868ee8129c72a23ec323d3febb513286c3cdf3c837adfe39721f50032
 	plaintext := []byte("exampleplaintext")
 
 	block, err := aes.NewCipher(key)
