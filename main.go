@@ -27,35 +27,13 @@ func initEncrypt(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(fromReq.Key)
-	fmt.Println(fromReq.Message)
-	fmt.Fprintln(w, fromReq.Key)
-	fmt.Fprintln(w, fromReq.Message)
-	//fmt.Println(string(body))
-/*	r.ParseForm()
-	key := r.PostForm.Get("key")
-	message := r.PostForm.Get("message")
-	fmt.Println(key, message)
-	fmt.Fprintf(w, "Key: %s\n", key)
-	fmt.Fprintf(w, "Message: %s\n", message)
-/*	switch r.Method {
-	case "GET":
-		http.Error(w, "404 not found.", http.StatusNotFound)
-		return
-	case "POST":
-		if err := r.ParseForm(); err != nil {
-			fmt.Fprintf(w, "ParseForm() err: %v", err)
-			return
-		}
-		psswrd := r.FormValue("psswrd")
-		text := r.FormValue("text")
-		fmt.Fprintf(w, "Key: %s\n", psswrd)
-		fmt.Fprintf(w, "Message: %s\n", text)
-		fmt.Println(w, "Key: %s\n", psswrd)
-		fmt.Println(w, "Message: %s\n", text)
-	default:
-		fmt.Fprintf(w, "Only GET and POST requests are supported.")
-	}*/
+	fmt.Println("Key: ", fromReq.Key)
+	fmt.Println("Message: ", fromReq.Message)
+	eMessage, nonce := encrypt(fromReq.Key, fromReq.Message)
+	fmt.Println("Encrypted message: ", eMessage, "\nNonce: ", nonce)
+	fmt.Fprintln(w, "Key: ", fromReq.Key)
+	fmt.Fprintln(w, "Message: ", fromReq.Message)
+	fmt.Fprintln(w, "Decrypted message: ", decrypt(fromReq.Key, fromReq.Message, nonce))
 }
 
 func main() {
@@ -66,27 +44,32 @@ func main() {
 	}
 }
 
-func encrypt() {
+func encrypt(reqKey, reqMessage string) ([]byte, []byte) {
 	// Load your secret key from a safe place and reuse it across multiple
 	// Seal/Open calls. (Obviously don't use this example key for anything
 	// real.) If you want to convert a passphrase to a key, use a suitable
 	// package like bcrypt or scrypt.
-	// When decoded the key should be 16 bytes (AES-128) or 32 (AES-256).
-	key, _ := hex.DecodeString("6368616e676520746869732070617373776f726420746f206120736563726574")
+	// When decoded the key should be 16 bytes (AES-128)// or 32 (AES-256).
+	key, _ := hex.DecodeString(reqKey)//"6368616e676520746869732070617373776f726420746f206120736563726574")
 	//679098d868ee8129c72a23ec323d3febb513286c3cdf3c837adfe39721f50032
-	plaintext := []byte("exampleplaintext")
+	plaintext := []byte(reqMessage)
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
+		fmt.Println("Key needs to be 16 bytes (AES-128) compliant")
 		panic(err.Error())
 	}
 
 	// Never use more than 2^32 random nonces with a given key because of the risk of a repeat.
+//	nonce, _ := hex.DecodeString("afb8a7579bf971db9f8ceeed")//nonce, _ := hex.DecodeString("TestNonce123456789876543")
+/*	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err.Error())
+	}
+*/
 	nonce := make([]byte, 12)
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		panic(err.Error())
 	}
-
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
 		panic(err.Error())
@@ -94,18 +77,22 @@ func encrypt() {
 
 	ciphertext := aesgcm.Seal(nil, nonce, plaintext, nil)
 	fmt.Printf("%x\n", ciphertext)
+	return ciphertext, nonce
 }
 
-func decrypt() {
+func decrypt(reqKey, reqMessage string, nonce []byte) []byte {
 	// Load your secret key from a safe place and reuse it across multiple
 	// Seal/Open calls. (Obviously don't use this example key for anything
 	// real.) If you want to convert a passphrase to a key, use a suitable
 	// package like bcrypt or scrypt.
 	// When decoded the key should be 16 bytes (AES-128) or 32 (AES-256).
-	key, _ := hex.DecodeString("6368616e676520746869732070617373776f726420746f206120736563726574")
-	ciphertext, _ := hex.DecodeString("c3aaa29f002ca75870806e44086700f62ce4d43e902b3888e23ceff797a7a471")
-	nonce, _ := hex.DecodeString("64a9433eae7ccceee2fc0eda")
-
+	key, _ := hex.DecodeString(reqKey)//"6368616e676520746869732070617373776f726420746f206120736563726574")
+	ciphertext, _ := hex.DecodeString(reqMessage)//"c3aaa29f002ca75870806e44086700f62ce4d43e902b3888e23ceff797a7a471")
+	//nonce, _ := hex.DecodeString("afb8a7579bf971db9f8ceeed")//nonce, _ := hex.DecodeString("TestNonce123456789876543")//nonce := make([]byte, 12)//, _ := hex.DecodeString("64a9433eae7ccceee2fc0eda")
+/*	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err.Error())
+	}
+	*/
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err.Error())
@@ -122,5 +109,5 @@ func decrypt() {
 	}
 
 	fmt.Printf("%s\n", plaintext)
+	return plaintext
 }
-
