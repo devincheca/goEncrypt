@@ -1,0 +1,4 @@
+for []byte to string try:
+str := fmt.Sprintf("%s", byteArray)
+or
+s := string(byteArray[:])
