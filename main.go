@@ -5,14 +5,40 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
 
+type stringStruct struct {
+	Key, Message string
+}
+
 func initEncrypt(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		panic(err)
+	}
+	var fromReq stringStruct
+	err = json.Unmarshal(body, &fromReq)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(fromReq.Key)
+	fmt.Println(fromReq.Message)
+	fmt.Fprintln(w, fromReq.Key)
+	fmt.Fprintln(w, fromReq.Message)
+	//fmt.Println(string(body))
+/*	r.ParseForm()
+	key := r.PostForm.Get("key")
+	message := r.PostForm.Get("message")
+	fmt.Println(key, message)
+	fmt.Fprintf(w, "Key: %s\n", key)
+	fmt.Fprintf(w, "Message: %s\n", message)
+/*	switch r.Method {
 	case "GET":
 		http.Error(w, "404 not found.", http.StatusNotFound)
 		return
@@ -29,7 +55,7 @@ func initEncrypt(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(w, "Message: %s\n", text)
 	default:
 		fmt.Fprintf(w, "Only GET and POST requests are supported.")
-	}
+	}*/
 }
 
 func main() {
