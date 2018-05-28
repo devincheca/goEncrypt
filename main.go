@@ -33,6 +33,8 @@ func initEncrypt(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Encrypted message: ", eMessage, "\nNonce: ", nonce)
 	fmt.Fprintln(w, "Key: ", fromReq.Key)
 	fmt.Fprintln(w, "Message: ", fromReq.Message)
+	fmt.Fprintln(w, "Encrypted message: ", eMessage)
+	fmt.Fprintln(w, "Nonce: ", nonce)
 	fmt.Fprintln(w, "Decrypted message: ", decrypt(fromReq.Key, eMessage, nonce))
 }
 
