@@ -17,10 +17,6 @@ type input struct {
 	Key, Message string
 }
 
-type output struct {
-	EncryptedMessage, Nonce string
-}
-
 func initEncrypt(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -59,13 +55,8 @@ func encrypt(reqKey, reqMessage string) ([]byte, []byte) {
 		fmt.Println("Key needs to be 16 bytes (AES-128) compliant")
 		panic(err.Error())
 	}
-
 	// Never use more than 2^32 random nonces with a given key because of the risk of a repeat.
 //	nonce, _ := hex.DecodeString("afb8a7579bf971db9f8ceeed")//nonce, _ := hex.DecodeString("TestNonce123456789876543")
-/*	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
-	}
-*/
 	nonce := make([]byte, 12)
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		panic(err.Error())
@@ -74,7 +65,6 @@ func encrypt(reqKey, reqMessage string) ([]byte, []byte) {
 	if err != nil {
 		panic(err.Error())
 	}
-
 	ciphertext := aesgcm.Seal(nil, nonce, plaintext, nil)
 	//fmt.Printf("%x\n", ciphertext)
 	return ciphertext, nonce
@@ -85,25 +75,18 @@ func decrypt(reqKey string, reqMessage, nonce []byte) []byte {
 	key, _ := hex.DecodeString(reqKey)//"6368616e676520746869732070617373776f726420746f206120736563726574")
 	ciphertext := reqMessage//, _ := hex.DecodeString(reqMessage)//"c3aaa29f002ca75870806e44086700f62ce4d43e902b3888e23ceff797a7a471")
 	//nonce, _ := hex.DecodeString("afb8a7579bf971db9f8ceeed")//nonce, _ := hex.DecodeString("TestNonce123456789876543")//nonce := make([]byte, 12)//, _ := hex.DecodeString("64a9433eae7ccceee2fc0eda")
-/*	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
-	}
-	*/
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		panic(err.Error())
 	}
-
 	aesgcm, err := cipher.NewGCM(block)
 	if err != nil {
 		panic(err.Error())
 	}
-
 	plaintext, err := aesgcm.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		panic(err.Error())
 	}
-
 	fmt.Printf("%s\n", plaintext)
 	return plaintext
 }
