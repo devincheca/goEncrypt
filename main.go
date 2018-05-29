@@ -31,23 +31,30 @@ func initEncrypt(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("Key: ", fromReq.Key)
-	fmt.Println("Message: ", fromReq.Message)
+//	fmt.Println("Key: ", fromReq.Key)
+//	fmt.Println("Message: ", fromReq.Message)
 	eMessage, nonce := encrypt(fromReq.Key, fromReq.Message)
 	encryptMessage := fmt.Sprintf("%x", eMessage)
 	nonceString := fmt.Sprintf("%x", nonce)
-	fmt.Println("Encrypted message: ", encryptMessage, "\nNonce: ", nonceString)
-	forRes := output{
-		EncryptedMessage: encryptMessage,
-		Nonce: nonceString,
-	}
-	fmt.Fprintln(w, encryptMessage)
-	fmt.Fprintln(w, nonceString)
-	res, err := json.Marshal(forRes)
+	//fmt.Println("Encrypted message: ", encryptMessage, "\nNonce: ", nonceString)
+//	forRes := output{
+//		EncryptedMessage: encryptMessage,
+//		Nonce: nonceString,
+//	}
+	fmt.Print("{\"EncryptedMessage\":\"", encryptMessage, "\",")
+	fmt.Print("\"Nonce\":\"", nonceString, "\"}")
+	fmt.Fprint(w, "{\"EncryptedMessage\":\"", encryptMessage, "\",")
+	fmt.Fprint(w, "\"Nonce\":\"", nonceString, "\"}")
+/*	res, err := json.Marshal(forRes)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Fprintln(w, res)
+//	jsonRes, err := os.Stdout.Write(res)
+//	if err != nil {
+//		panic(err)
+//	}
+//	fmt.Println(jsonRes)
+//	fmt.Fprintln(w, string(jsonRes))
 /*	for i := 0; i < len(eMessage); i++ {
 		fmt.Print(eMessage[i])
 	}
@@ -101,7 +108,7 @@ func encrypt(reqKey, reqMessage string) ([]byte, []byte) {
 	}
 
 	ciphertext := aesgcm.Seal(nil, nonce, plaintext, nil)
-	fmt.Printf("%x\n", ciphertext)
+	//fmt.Printf("%x\n", ciphertext)
 	return ciphertext, nonce
 }
 
