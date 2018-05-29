@@ -13,8 +13,12 @@ import (
 	"net/http"
 )
 
-type stringStruct struct {
+type input struct {
 	Key, Message string
+}
+
+type output struct {
+	EncryptedMessage, Nonce string
 }
 
 func initEncrypt(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +26,7 @@ func initEncrypt(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	var fromReq stringStruct
+	var fromReq input
 	err = json.Unmarshal(body, &fromReq)
 	if err != nil {
 		panic(err)
@@ -30,12 +34,31 @@ func initEncrypt(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Key: ", fromReq.Key)
 	fmt.Println("Message: ", fromReq.Message)
 	eMessage, nonce := encrypt(fromReq.Key, fromReq.Message)
-	fmt.Println("Encrypted message: ", eMessage, "\nNonce: ", nonce)
-	fmt.Fprintln(w, "Key: ", fromReq.Key)
+	encryptMessage := fmt.Sprintf("%x", eMessage)
+	nonceString := fmt.Sprintf("%x", nonce)
+	fmt.Println("Encrypted message: ", encryptMessage, "\nNonce: ", nonceString)
+	forRes := output{
+		EncryptedMessage: encryptMessage,
+		Nonce: nonceString,
+	}
+	fmt.Fprintln(w, encryptMessage)
+	fmt.Fprintln(w, nonceString)
+	res, err := json.Marshal(forRes)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Fprintln(w, res)
+/*	for i := 0; i < len(eMessage); i++ {
+		fmt.Print(eMessage[i])
+	}
+	for i := 0; i < len(nonce); i++ {
+		fmt.Print(nonce[i])
+	}
+/*	fmt.Fprintln(w, "Key: ", fromReq.Key)
 	fmt.Fprintln(w, "Message: ", fromReq.Message)
 	fmt.Fprintln(w, "Encrypted message: ", eMessage)
 	fmt.Fprintln(w, "Nonce: ", nonce)
-	fmt.Fprintln(w, "Decrypted message: ", decrypt(fromReq.Key, eMessage, nonce))
+	fmt.Fprintln(w, "Decrypted message: ", decrypt(fromReq.Key, eMessage, nonce))*/
 }
 
 func main() {
