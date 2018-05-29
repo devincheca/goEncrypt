@@ -27,6 +27,16 @@ func initEncrypt(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	if fromReq.Key == "" {
+		fmt.Print(w, "Request received without valid key.")
+		fmt.Fprint(w, "A key is required for encryption.")
+		panic("A key is required for encryption.")
+	}
+	if fromReq.Message == "" {
+		fmt.Print(w, "Request received with valid key and without message")
+		fmt.Fprint(w, "A message is required for encryption.")
+		panic("A message is required for encryption.")
+	}
 	eMessage, nonce := encrypt(fromReq.Key, fromReq.Message)
 	encryptMessage := fmt.Sprintf("%x", eMessage)
 	nonceString := fmt.Sprintf("%x", nonce)
