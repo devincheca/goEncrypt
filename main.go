@@ -31,41 +31,13 @@ func initEncrypt(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-//	fmt.Println("Key: ", fromReq.Key)
-//	fmt.Println("Message: ", fromReq.Message)
 	eMessage, nonce := encrypt(fromReq.Key, fromReq.Message)
 	encryptMessage := fmt.Sprintf("%x", eMessage)
 	nonceString := fmt.Sprintf("%x", nonce)
-	//fmt.Println("Encrypted message: ", encryptMessage, "\nNonce: ", nonceString)
-//	forRes := output{
-//		EncryptedMessage: encryptMessage,
-//		Nonce: nonceString,
-//	}
 	fmt.Print("{\"EncryptedMessage\":\"", encryptMessage, "\",")
 	fmt.Print("\"Nonce\":\"", nonceString, "\"}")
 	fmt.Fprint(w, "{\"EncryptedMessage\":\"", encryptMessage, "\",")
 	fmt.Fprint(w, "\"Nonce\":\"", nonceString, "\"}")
-/*	res, err := json.Marshal(forRes)
-	if err != nil {
-		panic(err)
-	}
-//	jsonRes, err := os.Stdout.Write(res)
-//	if err != nil {
-//		panic(err)
-//	}
-//	fmt.Println(jsonRes)
-//	fmt.Fprintln(w, string(jsonRes))
-/*	for i := 0; i < len(eMessage); i++ {
-		fmt.Print(eMessage[i])
-	}
-	for i := 0; i < len(nonce); i++ {
-		fmt.Print(nonce[i])
-	}
-/*	fmt.Fprintln(w, "Key: ", fromReq.Key)
-	fmt.Fprintln(w, "Message: ", fromReq.Message)
-	fmt.Fprintln(w, "Encrypted message: ", eMessage)
-	fmt.Fprintln(w, "Nonce: ", nonce)
-	fmt.Fprintln(w, "Decrypted message: ", decrypt(fromReq.Key, eMessage, nonce))*/
 }
 
 func main() {
@@ -77,10 +49,6 @@ func main() {
 }
 
 func encrypt(reqKey, reqMessage string) ([]byte, []byte) {
-	// Load your secret key from a safe place and reuse it across multiple
-	// Seal/Open calls. (Obviously don't use this example key for anything
-	// real.) If you want to convert a passphrase to a key, use a suitable
-	// package like bcrypt or scrypt.
 	// When decoded the key should be 16 bytes (AES-128)// or 32 (AES-256).
 	key, _ := hex.DecodeString(reqKey)//"6368616e676520746869732070617373776f726420746f206120736563726574")
 	//679098d868ee8129c72a23ec323d3febb513286c3cdf3c837adfe39721f50032
@@ -113,10 +81,6 @@ func encrypt(reqKey, reqMessage string) ([]byte, []byte) {
 }
 
 func decrypt(reqKey string, reqMessage, nonce []byte) []byte {
-	// Load your secret key from a safe place and reuse it across multiple
-	// Seal/Open calls. (Obviously don't use this example key for anything
-	// real.) If you want to convert a passphrase to a key, use a suitable
-	// package like bcrypt or scrypt.
 	// When decoded the key should be 16 bytes (AES-128) or 32 (AES-256).
 	key, _ := hex.DecodeString(reqKey)//"6368616e676520746869732070617373776f726420746f206120736563726574")
 	ciphertext := reqMessage//, _ := hex.DecodeString(reqMessage)//"c3aaa29f002ca75870806e44086700f62ce4d43e902b3888e23ceff797a7a471")
