@@ -1,5 +1,5 @@
 # goEncrypt
 encryption microservice written in Go
 
-the idea is to take in the cipher key via http encoded with bcrypt or scrypt
-encrypt the data and pass it back
+it works by passing in an encryption key and a message to encrypt formatted as JSON
+it returns the encrypted message and a random nonce formatted as JSON
