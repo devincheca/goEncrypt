@@ -9,3 +9,4 @@ set background=dark
 set mouse=a
 set visualbell
 syntax enable
+set backspace=indent,eol,start
