@@ -9,10 +9,6 @@ for decryption check out this repo:
 
 https://github.com/devincheca/goDecrypt
 
-try it for yourself at:
-
-52.15.115.81:3000
-
 with a POST request with the following JSON:
 
 {
